@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", "module": "ESNext", "moduleResolution": "Bundler",
+    "strict": true, "verbatimModuleSyntax": true, "isolatedModules": true,
+    "types": ["bun"], "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "preserve", "jsxImportSource": "@solidjs/web", "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src", "tests", "scripts"]
+}

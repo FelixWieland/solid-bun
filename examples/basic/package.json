@@ -1,0 +1,21 @@
+{
+  "name": "solid-bun-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "solid-bun dev",
+    "build": "solid-bun build",
+    "preview": "solid-bun preview",
+    "test": "bun test",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "solid-js": "2.0.0-rc.9",
+    "@solidjs/web": "2.0.0-rc.9"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "solid-bun": "../../solid-bun-0.1.0.tgz",
+    "typescript": "5.9.3"
+  }
+}

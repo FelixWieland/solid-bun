@@ -1,0 +1,80 @@
+{
+  "name": "solid-bun",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Client-side Solid 2 with Bun: compiler, HMR, workers, source maps and bun:test.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "bun": ">=1.4.2"
+  },
+  "packageManager": "bun@1.4.2",
+  "bin": {
+    "solid-bun": "./src/cli.ts"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./types": {
+      "types": "./src/types.d.ts"
+    },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./plugin": {
+      "types": "./dist/solid-plugin.d.ts",
+      "default": "./src/solid-plugin.ts"
+    },
+    "./dev-plugin": {
+      "types": "./dist/dev-plugin.d.ts",
+      "default": "./src/dev-plugin.ts"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./test": {
+      "types": "./dist/test.d.ts",
+      "default": "./src/test.ts"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "docs",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "tsc --noEmit",
+    "test": "bun test",
+    "verify:package": "bun scripts/verify-package.ts",
+    "example:prepare": "bun scripts/prepare-example.ts",
+    "prepack": "bun run build"
+  },
+  "peerDependencies": {
+    "solid-js": "2.0.0-rc.9",
+    "@solidjs/web": "2.0.0-rc.9"
+  },
+  "dependencies": {
+    "@solidjs/compiler": "2.0.0-rc.9",
+    "@jridgewell/remapping": "2.3.5",
+    "@jridgewell/trace-mapping": "0.3.31",
+    "magic-string": "1.4.2",
+    "happy-dom": "20.14.5"
+  },
+  "devDependencies": {
+    "@solidjs/web": "2.0.0-rc.9",
+    "@types/bun": "1.4.2",
+    "solid-js": "2.0.0-rc.9",
+    "typescript": "5.9.3"
+  },
+  "peerDependenciesMeta": {
+    "solid-js": {
+      "optional": true
+    },
+    "@solidjs/web": {
+      "optional": true
+    }
+  }
+}

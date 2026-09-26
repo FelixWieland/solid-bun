@@ -1,0 +1,5 @@
+[serve.static]
+plugins = ["solid-bun/dev-plugin"]
+
+[test]
+preload = ["solid-bun/test"]
