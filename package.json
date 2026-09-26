@@ -1,7 +1,6 @@
 {
   "name": "solid-bun",
   "version": "2.0.0-rc.9",
-  "private": true,
   "description": "Client-side Solid 2 with Bun: compiler, HMR, workers, source maps and bun:test.",
   "license": "UNLICENSED",
   "type": "module",
@@ -42,7 +41,8 @@
     "src",
     "dist",
     "docs",
-    "README.md"
+    "README.md",
+    "assets"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -76,5 +76,18 @@
     "@solidjs/web": {
       "optional": true
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FelixWieland/solid-bun.git"
+  },
+  "homepage": "https://github.com/FelixWieland/solid-bun#readme",
+  "bugs": {
+    "url": "https://github.com/FelixWieland/solid-bun/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "registry": "https://registry.npmjs.org/"
   }
 }
