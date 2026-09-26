@@ -36,7 +36,7 @@ Edit `Counter.tsx`, `Counter.module.css` or `greeting.worker.ts` to exercise HMR
 
 ```sh
 bun add solid-js@2.0.0-rc.9 @solidjs/web@2.0.0-rc.9
-bun add -d /absolute/path/to/solid-bun/solid-bun-0.1.0.tgz
+bun add -d /absolute/path/to/solid-bun/solid-bun-2.0.0-rc.9.tgz
 ```
 
 Solid and web are application `dependencies`; `solid-bun` and TypeScript are application `devDependencies`. Solid/web remain optional peers: installation does not add them automatically, and missing or incompatible versions produce an explicit installation hint. The compiler, source-map tools and Happy DOM are direct library dependencies installed with `solid-bun`. No separate Happy DOM installation is needed; it loads only through `solid-bun/test` and stays out of browser bundles.

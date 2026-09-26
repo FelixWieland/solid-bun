@@ -1,6 +1,6 @@
 {
   "name": "solid-bun",
-  "version": "0.1.0",
+  "version": "2.0.0-rc.9",
   "private": true,
   "description": "Client-side Solid 2 with Bun: compiler, HMR, workers, source maps and bun:test.",
   "license": "UNLICENSED",
