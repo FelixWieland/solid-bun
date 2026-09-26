@@ -9,7 +9,7 @@
   },
   "packageManager": "bun@1.4.2",
   "bin": {
-    "solid-bun": "./src/cli.ts"
+    "solid-bun": "src/cli.ts"
   },
   "types": "./dist/index.d.ts",
   "exports": {
