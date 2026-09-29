@@ -45,9 +45,12 @@ async function checkServer(mode: 'dev' | 'preview') {
     }
     const worker = await fetch(new URL('/workers/greeting.js', url)); assert.equal(worker.status, 200);
     assert.ok((await worker.text()).includes('Hello from a TypeScript worker'));
+    const nested = await fetch(new URL('/nested/route', url), { headers: { accept: 'text/html' } });
+    assert.equal(nested.status, 200, 'spa: nested navigation serves the entry');
+    assert.ok((await nested.text()).includes('id="root"'));
     assert.equal((await fetch(new URL('/missing.js', url))).status, 404);
     assert.equal((await fetch(new URL('/%2e%2e%2fpackage.json', url))).status, 404);
-    console.log(`Packed consumer ${mode}: HTML, JS/CSS, worker, 404 and path boundary passed`);
+    console.log(`Packed consumer ${mode}: HTML, JS/CSS, worker, SPA fallback, 404 and path boundary passed`);
   } finally {
     clearTimeout(timeout); await reader.cancel(); child.kill('SIGTERM');
     const kill = setTimeout(() => child.kill('SIGKILL'), 2000);

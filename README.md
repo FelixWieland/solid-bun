@@ -106,7 +106,7 @@ const stop = watchWorker('chart', async (url, signal) => {
 
 This fragment describes the lifecycle contract; see [the runnable example](examples/basic/src/main.tsx) for an actual Worker implementation. Call `stop()` during HMR disposal/unmount. The old resource remains active until preparation succeeds; errors, timeouts and superseded builds abort the candidate. `activate()` must be synchronous and exception-safe, and `dispose()` must not throw. OffscreenCanvas consumers must prepare fresh canvases and transfer them to the candidate; state migration is application-owned.
 
-Options: `root` (current directory), `entry` (`index.html`), `outdir` (`dist`), `port` (`3000`), `workers`, `watch` (`src`) and optional HTTP `fetch`. CLI supports `--port`, including `0` for an available port. Imported worker helpers must live under `watch` to trigger rebuilding.
+Options: `root` (current directory), `entry` (`index.html`), `outdir` (`dist`), `port` (`3000`), `workers`, `watch` (`src`), optional HTTP `fetch` and `spa` for client-side routing. CLI supports `--port`, including `0` for an available port. Imported worker helpers must live under `watch` to trigger rebuilding.
 
 ## APIs and boundaries
 
@@ -119,7 +119,7 @@ Options: `root` (current directory), `entry` (`index.html`), `outdir` (`dist`), 
 | `solid-bun/test` | Opt-in Happy DOM + real Solid browser builds + runtime JSX/CSS transforms |
 | `solid-bun/types` | Ambient CSS Module types |
 
-`dev` and `preview` return `{ url, stop() }`. The optional `fetch(request)` integrates native HTTP handlers; return `undefined` for 404. Application WebSocket orchestration is outside this API. Development uses two loopback listeners in one Bun process to compose native source-map responses while forwarding Bun HMR. Production outputs static files; preview is a local verification server, without SPA routing.
+`dev` and `preview` return `{ url, stop() }`. The optional `fetch(request)` integrates native HTTP handlers; return `undefined` for 404. Application WebSocket orchestration is outside this API. Development uses two loopback listeners in one Bun process to compose native source-map responses while forwarding Bun HMR. With `spa: true`, dev and preview answer unmatched page navigations (`GET`/`HEAD` accepting `text/html`) with the HTML entry after `fetch`, and builds reference assets from `/` so nested URLs resolve them; missing assets stay 404. Production outputs static files; the deploying server needs the same entry fallback. Preview is a local verification server.
 
 The test preload installs DOM globals for the entire test process. Backend and database tests still use ordinary `bun:test`. Happy DOM does not establish browser layout, real workers, GPU behavior or browser performance. Browser integration remains a separate validation step. JSX stack/coverage remapping inside the test runtime is not guaranteed.
 

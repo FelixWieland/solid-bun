@@ -17,6 +17,10 @@ Bun's final map describes plugin output instead of composing the embedded compil
 
 Workers have independent, serialized build graphs. Each worker watches the configured source tree, retains four content-addressed successful bundles and sends SSE updates. Build failure preserves the last good artifact. Streams cap connected clients (32 per worker) and close slow readers; heartbeat keeps connections alive. The browser helper aborts obsolete preparations, waits for readiness and disposes the old resource only after successful activation. It does not invent an application message protocol. Assets emitted separately by worker builds are not currently supported in the development artifact cache; use workers whose output is a single JavaScript bundle.
 
+## Client-side routing
+
+`spa` is opt-in because it changes build output: the HTML entry is built with Bun's `publicPath: '/'`, so a page loaded at `/a/b` still requests `/index-*.js` instead of `/a/index-*.js`. The site must then be served from the root. Dev and preview answer only navigations (`GET`/`HEAD` whose `Accept` includes `text/html`) that no worker route or application `fetch` handled; scripts, styles, maps and API calls keep their 404. Dev fetches the native HTML route at `/` so Bun's HMR entry is reused rather than duplicated.
+
 ## Package conventions
 
 Follow [npm package fields](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/): explicit `exports`, executable `bin`, an allowlist in `files`, and framework `peerDependencies`. Ship [TypeScript declarations](https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html) alongside Bun-executed source. Commit lockfiles, verify the archive in a separate consumer directory, and test browser-facing behavior independently of DOM emulation. The CLI requires Bun on PATH; type checking uses the installed TypeScript CLI, not Bun's transpiler.
