@@ -52,7 +52,7 @@ function isNavigation(request: Request): boolean {
   return (request.method === 'GET' || request.method === 'HEAD') && (request.headers.get('accept') ?? '').includes('text/html');
 }
 
-/** Build static browser assets. Source maps are composed back to authored TSX. */
+/** Build static, production-mode browser assets. Source maps are composed back to authored TSX. */
 export async function build(options: SolidBunOptions = {}): Promise<void> {
   const { root, outdir, entry, workers } = settings(options);
   requireSolidPeers(root);
@@ -64,7 +64,9 @@ export async function build(options: SolidBunOptions = {}): Promise<void> {
     const result = await Bun.build({ entrypoints: [item.entry], outdir: item.outdir,
       naming: { entry: item.naming, chunk: '[name]-[hash].[ext]', asset: '[name]-[hash].[ext]' },
       ...(item.publicPath ? { publicPath: item.publicPath } : {}),
-      target: 'browser', minify: true, sourcemap: 'linked', plugins: [createSolidPlugin(false, root)] });
+      target: 'browser', minify: true, sourcemap: 'linked', plugins: [createSolidPlugin(false, root)],
+      // Bun resolves the `development` export condition unless NODE_ENV is production.
+      define: { 'process.env.NODE_ENV': '"production"' } });
     if (!result.success) throw new AggregateError(result.logs, result.logs.map(String).join('\n'));
     for (const output of result.outputs) {
       if (output.path.endsWith('.map')) await Bun.write(output.path, composeSourceMap(await output.text()));
