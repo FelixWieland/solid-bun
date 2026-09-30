@@ -5,3 +5,4 @@ dist/
 .DS_Store
 examples/basic/bun.lock
 tests/fixtures/.build-error/
+.npmrc
