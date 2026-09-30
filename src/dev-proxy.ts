@@ -4,6 +4,30 @@ import type { ServerWebSocket } from 'bun';
 type Peer = { upstream: WebSocket; queued: (string | Buffer)[]; bytes: number };
 const limit = 1024 * 1024;
 
+// Bun 1.4.2's "Build Failed" page parses its embedded error payload into an extra
+// phantom error that the HMR "errors cleared" message never removes, so a page
+// loaded while the build is broken never reloads after the fix. The injected
+// script polls the same URL and reloads once it builds again.
+const recoveryScript = `<script>(() => {
+  const check = async () => {
+    try {
+      const response = await fetch(location.href, { headers: { accept: 'text/html' }, cache: 'no-store' });
+      if (response.ok) return location.reload();
+    } catch {}
+    setTimeout(check, 1000);
+  };
+  setTimeout(check, 1000);
+})();</script>`;
+
+/** Adds the reload-after-fix script to Bun's build error page. */
+export function withBuildErrorRecovery(html: string): string {
+  const end = html.lastIndexOf('</body>');
+  return end === -1 ? html + recoveryScript : html.slice(0, end) + recoveryScript + html.slice(end);
+}
+
+const isBuildErrorPage = (response: Response) =>
+  response.status === 500 && response.headers.get('content-type')?.startsWith('text/html') === true;
+
 // Native Bun's reserved /_bun map routes bypass application fetch handlers.
 // A loopback front server can compose those responses while forwarding Bun HMR.
 export function serveDevelopment(upstreamUrl: URL, port: number) {
@@ -30,6 +54,12 @@ export function serveDevelopment(upstreamUrl: URL, port: number) {
         headers.delete('content-length'); headers.delete('etag'); headers.delete('content-encoding');
         headers.set('cache-control', 'no-store');
         return new Response(composeSourceMap(await response.text()), { status: response.status, headers });
+      }
+      if (isBuildErrorPage(response)) {
+        const headers = new Headers(response.headers);
+        headers.delete('content-length'); headers.delete('etag'); headers.delete('content-encoding');
+        headers.set('cache-control', 'no-store');
+        return new Response(withBuildErrorRecovery(await response.text()), { status: response.status, headers });
       }
       return response;
     },
