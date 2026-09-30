@@ -12,7 +12,7 @@ for (const name of ['window', 'document', 'navigator', 'Node', 'Element', 'HTMLE
   Object.defineProperty(globalThis, name, { configurable: true, value: name === 'window' ? window : window[name] });
 }
 // Resolve the consumer's installed peers, then select their real browser builds.
-// rc.9's Bun condition selects server builds; no framework behavior is mocked.
+// Solid 2's Bun condition selects server builds; no framework behavior is mocked.
 const solidBrowser = join(dirname(Bun.resolveSync('solid-js', process.cwd())), 'solid.js');
 const webBrowser = join(dirname(Bun.resolveSync('@solidjs/web', process.cwd())), 'web.js');
 mock.module('solid-js', () => import(solidBrowser));

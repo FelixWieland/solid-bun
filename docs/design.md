@@ -7,7 +7,7 @@ The API favors explicit boundaries: tooling imports Bun/compiler dependencies, t
 - [Bun HTML development server](https://bun.com/docs/bundler/fullstack): HTML entry and `bunfig.toml` plugin registration. Keep this visible two-line registration instead of generating hidden configuration or spawning a second runtime.
 - [Bun plugins](https://bun.com/docs/bundler/plugins): transform JSX through `@solidjs/compiler`. Its output retains TypeScript, so the adapter returns the `ts` loader. CSS Modules are compiled by Bun, not by a custom class-name parser.
 - [Bun HMR](https://bun.com/docs/bundler/hot-reloading): use direct `import.meta.hot` calls. An internal facade adapts the official Solid refresh transform to this constraint. Component edits can remount local state; entry effects require explicit disposal.
-- [Bun DOM testing](https://bun.com/docs/test/dom): preload a DOM environment for `bun:test`. rc.9 resolves server builds under Bun, so preload redirects to the installed peers' real browser implementations. Those internal paths are version-sensitive and covered by consumer tests.
+- [Bun DOM testing](https://bun.com/docs/test/dom): preload a DOM environment for `bun:test`. Solid 2 prereleases resolve server builds under Bun, so preload redirects to the installed peers' real browser implementations. Those internal paths are version-sensitive and covered by consumer tests.
 
 ## Compatibility adaptations
 

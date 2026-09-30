@@ -22,6 +22,6 @@ export function requirePeer(name: string, version: string, root: string): string
 }
 
 export function requireSolidPeers(root: string): void {
-  requirePeer('solid-js', '2.0.0-rc.9', root);
-  requirePeer('@solidjs/web', '2.0.0-rc.9', root);
+  requirePeer('solid-js', '2.0.0-rc.13', root);
+  requirePeer('@solidjs/web', '2.0.0-rc.13', root);
 }

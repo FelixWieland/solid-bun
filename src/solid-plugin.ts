@@ -28,11 +28,11 @@ export function createSolidPlugin(hmr = false, root = process.cwd()): BunPlugin 
         const maps = [];
         if (hmr) {
           const refreshed = transformRefresh(source, {
-            filename: path, bundler: 'esm', importSource: 'solid-js/refresh', sourceMap: true, fixRender: false,
+            filename: path, bundler: 'vite', importSource: 'solid-js/refresh', sourceMap: true, fixRender: false,
           });
           // Bun requires direct import.meta.hot API calls; Solid expects a hot object.
           const shim = new MagicString(refreshed.code);
-          for (const match of refreshed.code.matchAll(/_\$\$(?:refresh|decline)\w*\("esm", (import\.meta\.hot),/g)) {
+          for (const match of refreshed.code.matchAll(/_\$\$(?:refresh|decline)\w*\("vite", (import\.meta\.hot)[,)]/g)) {
             const offset = match.index! + match[0].indexOf('import.meta.hot');
             shim.overwrite(offset, offset + 'import.meta.hot'.length, `{ data: import.meta.hot.data, accept: cb => import.meta.hot.accept(cb), dispose: cb => import.meta.hot.dispose(cb), decline: () => import.meta.hot.decline(), invalidate: () => location.reload() }`);
           }
