@@ -1,6 +1,6 @@
 {
   "name": "solid-bun",
-  "version": "2.0.0-rc.13.1",
+  "version": "2.0.0-rc.13.2",
   "description": "Client-side Solid 2 with Bun: compiler, HMR, workers, source maps and bun:test.",
   "license": "UNLICENSED",
   "type": "module",
@@ -64,6 +64,7 @@
     "happy-dom": "20.14.5"
   },
   "devDependencies": {
+    "@solidjs/router": "2.0.0-next.32",
     "@solidjs/web": "2.0.0-rc.13",
     "@types/bun": "1.4.2",
     "solid-js": "2.0.0-rc.13",

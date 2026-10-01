@@ -36,7 +36,7 @@ Edit `Counter.tsx`, `Counter.module.css` or `greeting.worker.ts` to exercise HMR
 
 ```sh
 bun add solid-js@2.0.0-rc.13 @solidjs/web@2.0.0-rc.13
-bun add -d solid-bun@2.0.0-rc.13.1
+bun add -d solid-bun@2.0.0-rc.13.2
 ```
 
 Solid and web are application `dependencies`; `solid-bun` and TypeScript are application `devDependencies`. Solid/web remain optional peers: installation does not add them automatically, and missing or incompatible versions produce an explicit installation hint. The compiler, source-map tools and Happy DOM are direct library dependencies installed with `solid-bun`. No separate Happy DOM installation is needed; it loads only through `solid-bun/test` and stays out of browser bundles.
@@ -122,6 +122,8 @@ Options: `root` (current directory), `entry` (`index.html`), `outdir` (`dist`), 
 `dev` and `preview` return `{ url, stop() }`. The optional `fetch(request)` integrates native HTTP handlers; return `undefined` for 404. Application WebSocket orchestration is outside this API. Development uses two loopback listeners in one Bun process to compose native source-map responses while forwarding Bun HMR. With `spa: true`, dev and preview answer unmatched page navigations (`GET`/`HEAD` accepting `text/html`) with the HTML entry after `fetch`, and builds reference assets from `/` so nested URLs resolve them; missing assets stay 404. Production outputs static files; the deploying server needs the same entry fallback. Preview is a local verification server.
 
 The test preload installs DOM globals for the entire test process. Backend and database tests still use ordinary `bun:test`. Happy DOM does not establish browser layout, real workers, GPU behavior or browser performance. Browser integration remains a separate validation step. JSX stack/coverage remapping inside the test runtime is not guaranteed.
+
+Builds use Solid's production exports. Because solid-bun has no server functions, the plugin replaces `@solidjs/web/server-functions` (imported statically by `@solidjs/router`) with an inert stub in builds, dev and tests; this keeps the seroval codec out of the bundle (about 40 KiB minified in a router app). Calling a server function throws.
 
 Source maps include source text. Build leaves existing output files in place; use a clean, dedicated output directory for deployment. Worker entry URLs are stable, so deployment cache policy/versioning remains your responsibility. No copying of a `public/` directory, SSR, SolidStart or automatic worker state migration is implemented.
 

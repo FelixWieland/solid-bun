@@ -2,8 +2,11 @@ import { transform, transformRefresh } from '@solidjs/compiler';
 import MagicString from 'magic-string';
 import remapping from '@jridgewell/remapping';
 import type { BunPlugin } from 'bun';
+import { fileURLToPath } from 'node:url';
 import { compileCssModule } from './css-module';
 import { requireSolidPeers } from './peers';
+
+const serverFunctionsStub = fileURLToPath(new URL('./server-functions-stub.ts', import.meta.url));
 
 // Shared by the browser bundler and the bun:test runtime preload.
 export function createSolidPlugin(hmr = false, root = process.cwd()): BunPlugin {
@@ -11,6 +14,8 @@ export function createSolidPlugin(hmr = false, root = process.cwd()): BunPlugin 
     name: 'solid-2-client',
     setup(build) {
       requireSolidPeers(root);
+      // Client-only: replace the server function runtime the router imports statically.
+      build.onResolve({ filter: /^@solidjs\/web\/server-functions(\/client|\/server)?$/ }, () => ({ path: serverFunctionsStub }));
       if (hmr) {
         build.onLoad({ filter: /\.module\.css$/ }, async ({ path }) => {
           const { javascript, css } = await compileCssModule(path);
