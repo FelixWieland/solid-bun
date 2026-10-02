@@ -1,8 +1,5 @@
 import { composeSourceMap } from './source-maps';
-import type { ServerWebSocket } from 'bun';
-
-type Peer = { upstream: WebSocket; queued: (string | Buffer)[]; bytes: number };
-const limit = 1024 * 1024;
+import { createProxy, createWebSocketRelay, isUpgrade, type ProxyRules, type Relay } from './proxy';
 
 // Bun 1.4.2's "Build Failed" page parses its embedded error payload into an extra
 // phantom error that the HMR "errors cleared" message never removes, so a page
@@ -30,20 +27,19 @@ const isBuildErrorPage = (response: Response) =>
 
 // Native Bun's reserved /_bun map routes bypass application fetch handlers.
 // A loopback front server can compose those responses while forwarding Bun HMR.
-export function serveDevelopment(upstreamUrl: URL, port: number) {
-  const peers = new Set<ServerWebSocket<Peer>>();
-  const server = Bun.serve<Peer>({
+// Proxied paths are forwarded first, so their WebSocket upgrades never reach Bun's HMR server.
+export function serveDevelopment(upstreamUrl: URL, port: number, rules?: ProxyRules) {
+  const relay = createWebSocketRelay();
+  const proxy = createProxy(rules);
+  const server = Bun.serve<Relay>({
     hostname: '127.0.0.1', port, development: false,
     async fetch(request, server) {
+      const proxied = await proxy.handle(request, server, relay);
+      if (proxied !== false) return proxied;
       const url = new URL(new URL(request.url).pathname + new URL(request.url).search, upstreamUrl);
-      if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+      if (isUpgrade(request)) {
         url.protocol = 'ws:';
-        const protocols = request.headers.get('sec-websocket-protocol')?.split(',').map(value => value.trim());
-        const upstream = new WebSocket(url, protocols);
-        upstream.binaryType = 'arraybuffer';
-        if (server.upgrade(request, { data: { upstream, queued: [], bytes: 0 } })) return;
-        upstream.close();
-        return new Response('Upgrade failed', { status: 400 });
+        return relay.relay(request, server, url);
       }
       const headers = new Headers(request.headers);
       headers.delete('host');
@@ -63,32 +59,7 @@ export function serveDevelopment(upstreamUrl: URL, port: number) {
       }
       return response;
     },
-    websocket: {
-      maxPayloadLength: limit, backpressureLimit: limit, closeOnBackpressureLimit: true,
-      open(socket) {
-        peers.add(socket);
-        const { upstream } = socket.data;
-        upstream.onopen = () => {
-          for (const message of socket.data.queued) upstream.send(message);
-          socket.data.queued = []; socket.data.bytes = 0;
-        };
-        upstream.onmessage = event => socket.send(event.data);
-        upstream.onclose = () => socket.close();
-        upstream.onerror = () => socket.close(1011, 'HMR upstream failed');
-      },
-      message(socket, message) {
-        const { upstream } = socket.data;
-        if (upstream.readyState === WebSocket.OPEN) {
-          if (upstream.bufferedAmount > limit) socket.close(1013, 'HMR client too slow');
-          else upstream.send(message);
-        } else if (upstream.readyState === WebSocket.CONNECTING) {
-          socket.data.bytes += Buffer.byteLength(message);
-          if (socket.data.bytes > limit) socket.close(1009, 'HMR queue exceeded');
-          else socket.data.queued.push(typeof message === 'string' ? message : Buffer.from(message));
-        }
-      },
-      close(socket) { peers.delete(socket); socket.data.upstream.close(); },
-    },
+    websocket: relay.handlers,
   });
-  return { server, stop() { for (const peer of peers) { peer.data.upstream.close(); peer.close(); } return server.stop(true); } };
+  return { server, stop() { relay.closeAll(); return server.stop(true); } };
 }

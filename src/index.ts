@@ -3,10 +3,12 @@ import { mkdir, realpath } from 'node:fs/promises';
 import { createSolidPlugin } from './solid-plugin';
 import { composeSourceMap } from './source-maps';
 import { serveDevelopment } from './dev-proxy';
+import { createProxy, createWebSocketRelay, type ProxyRules, type Relay } from './proxy';
 import { createWorkerDevelopment } from './worker-dev';
 import { requireSolidPeers } from './peers';
 
 export { createSolidPlugin } from './solid-plugin';
+export type { ProxyRules } from './proxy';
 
 export interface SolidBunOptions {
   /** Project directory; defaults to the current working directory. */
@@ -21,6 +23,12 @@ export interface SolidBunOptions {
   workers?: Record<string, string>;
   /** Source tree watched for worker dependencies; defaults to src. */
   watch?: string;
+  /**
+   * Dev/preview only: path prefix → target URL, e.g. `{ '/api': 'http://127.0.0.1:4000' }`.
+   * Matching HTTP requests and WebSocket upgrades are forwarded with path and query, before
+   * `fetch`, workers and HMR; cookies, `Origin` and `User-Agent` reach the target unchanged.
+   */
+  proxy?: ProxyRules;
   /** Optional native HTTP backend; return undefined to continue to the 404 response. */
   fetch?: (request: Request) => Response | undefined | Promise<Response | undefined>;
   /**
@@ -44,6 +52,7 @@ function settings(options: SolidBunOptions) {
   for (const [name] of workers) {
     if (!/^[a-zA-Z0-9_-]+$/.test(name)) throw new Error(`Invalid worker name: ${name}`);
   }
+  createProxy(options.proxy); // validates the rules before any server starts
   return { root, outdir, workers, entry: resolve(root, options.entry ?? 'index.html') };
 }
 
@@ -93,7 +102,7 @@ export async function dev(options: SolidBunOptions = {}): Promise<RunningServer>
         return new Response('Not found', { status: 404 });
       },
     });
-    proxy = serveDevelopment(upstream.url, options.port ?? 3000);
+    proxy = serveDevelopment(upstream.url, options.port ?? 3000, options.proxy);
     return { url: proxy.server.url, async stop() {
       for (const service of services) service.stop();
       await proxy!.stop(); await upstream!.stop(true);
@@ -108,8 +117,13 @@ export async function dev(options: SolidBunOptions = {}): Promise<RunningServer>
 export async function preview(options: SolidBunOptions = {}): Promise<RunningServer> {
   const { outdir } = settings(options);
   const directory = await realpath(outdir);
-  const server = Bun.serve({ hostname: '127.0.0.1', port: options.port ?? 3000, development: false,
-    async fetch(request) {
+  const relay = createWebSocketRelay();
+  const proxy = createProxy(options.proxy);
+  const server = Bun.serve<Relay>({ hostname: '127.0.0.1', port: options.port ?? 3000, development: false,
+    websocket: relay.handlers,
+    async fetch(request, server) {
+      const proxied = await proxy.handle(request, server, relay);
+      if (proxied !== false) return proxied;
       const custom = await options.fetch?.(request); if (custom) return custom;
       if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
       let pathname: string;
@@ -128,5 +142,5 @@ export async function preview(options: SolidBunOptions = {}): Promise<RunningSer
       } catch { return notFound(); }
     },
   });
-  return { url: server.url, async stop() { await server.stop(true); } };
+  return { url: server.url, async stop() { relay.closeAll(); await server.stop(true); } };
 }

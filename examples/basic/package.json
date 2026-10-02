@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@types/bun": "1.4.2",
-    "solid-bun": "../../solid-bun-2.0.0-rc.13.2.tgz",
+    "solid-bun": "../../solid-bun-2.0.0-rc.13.3.tgz",
     "typescript": "5.9.3"
   }
 }

@@ -6,3 +6,4 @@ dist/
 examples/basic/bun.lock
 tests/fixtures/.build-error/
 .npmrc
+tests/fixtures/.proxy/
