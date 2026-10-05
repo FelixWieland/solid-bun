@@ -3,17 +3,20 @@ import MagicString from 'magic-string';
 import remapping from '@jridgewell/remapping';
 import type { BunPlugin } from 'bun';
 import { fileURLToPath } from 'node:url';
-import { compileCssModule } from './css-module';
+import { compileCssClassMaps, compileCssModule } from './css-module';
+import { inlineCssClasses, type ClassMaps } from './css-classes';
 import { requireSolidPeers } from './peers';
 
 const serverFunctionsStub = fileURLToPath(new URL('./server-functions-stub.ts', import.meta.url));
 
 // Shared by the browser bundler and the bun:test runtime preload.
-export function createSolidPlugin(hmr = false, root = process.cwd()): BunPlugin {
+// inlineClasses (production builds): class names of CSS Modules below root become literals in the templates.
+export function createSolidPlugin(hmr = false, root = process.cwd(), inlineClasses = false): BunPlugin {
   return {
     name: 'solid-2-client',
     setup(build) {
       requireSolidPeers(root);
+      let classMaps: ClassMaps | undefined;
       // Client-only: replace the server function runtime the router imports statically.
       build.onResolve({ filter: /^@solidjs\/web\/server-functions(\/client|\/server)?$/ }, () => ({ path: serverFunctionsStub }));
       if (hmr) {
@@ -31,6 +34,8 @@ export function createSolidPlugin(hmr = false, root = process.cwd()): BunPlugin 
       build.onLoad({ filter: /\.[jt]sx$/ }, async ({ path }) => {
         let source = await Bun.file(path).text();
         const maps = [];
+        const inlined = classMaps && inlineCssClasses(source, path, classMaps);
+        if (inlined) source = inlined.code;
         if (hmr) {
           const refreshed = transformRefresh(source, {
             filename: path, bundler: 'vite', importSource: 'solid-js/refresh', sourceMap: true, fixRender: false,
@@ -45,14 +50,17 @@ export function createSolidPlugin(hmr = false, root = process.cwd()): BunPlugin 
           if (refreshed.map) maps.push(shim.generateMap({ source: path, includeContent: true, hires: true }), JSON.parse(refreshed.map));
         }
         const result = transform(source, {
-          filename: path, generate: 'dom', hydratable: false, sourceMap: true,
+          filename: path, generate: 'dom', hydratable: false, sourceMap: true, staticMarker: '@once',
         });
+        if (inlined) maps.push(inlined.map);
         const composed = remapping([JSON.parse(result.map!), ...maps], () => null);
         const map = result.map
           ? `\n//# sourceMappingURL=data:application/json;base64,${Buffer.from(JSON.stringify(composed)).toString('base64')}`
           : '';
         return { contents: result.code + map, loader: 'ts' };
       });
+      // Only then asynchronous: the dev server and the test preload register the plugin synchronously.
+      if (inlineClasses) return compileCssClassMaps(root).then(maps => { classMaps = maps; });
     },
   };
 }

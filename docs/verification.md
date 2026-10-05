@@ -23,6 +23,10 @@ The compiler's refresh pass no longer offers the `esm` mode; its `vite` mode emi
 
 After HMR WebSockets moved to the shared relay: installed Chrome via Playwright against the example from the packed rc.13.3 archive. A click set `Count: 1`; a CSS Module edit changed the panel background to `rgb(18, 112, 72)` and kept `Count: 1`; a component edit updated the heading without a further navigation. No page exceptions. Source edits were restored.
 
+### Class names in production builds (2026-10-05)
+
+MINT (100 TSX files, 55 CSS Modules) built with rc.13.3 and with this change from the same sources: main bundle 571960 → 538141 bytes minified, 186450 → 172032 gzip, 154168 → 144579 brotli; the stylesheet is byte-identical. All reads of existing class names were rewritten; what stayed were reads of names the stylesheets do not define. MINT's Playwright suite passed against the build made with the packed archive (130 passed, 1 skipped) in the installed Chrome.
+
 ## Limits
 
 No production deployment, load benchmark, browser automation suite, publication, Windows/Linux validation or compatibility claim for other Bun/Solid versions. Browser/production source maps have position-level automated coverage; Bun test-runtime stack traces and coverage remapping are not certified. OffscreenCanvas/state migration are consumer responsibilities; this generic example tests an actual messaging worker, not chart rendering. Development worker bundles must be self-contained JavaScript; additional emitted assets are rejected explicitly. Worker source dependencies outside the configured watch tree need a wider `watch` directory or restart.

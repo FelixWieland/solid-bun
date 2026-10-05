@@ -36,7 +36,7 @@ Edit `Counter.tsx`, `Counter.module.css` or `greeting.worker.ts` to exercise HMR
 
 ```sh
 bun add solid-js@2.0.0-rc.13 @solidjs/web@2.0.0-rc.13
-bun add -d solid-bun@2.0.0-rc.13.3
+bun add -d solid-bun@2.0.0-rc.13.4
 ```
 
 Solid and web are application `dependencies`; `solid-bun` and TypeScript are application `devDependencies`. Solid/web remain optional peers: installation does not add them automatically, and missing or incompatible versions produce an explicit installation hint. The compiler, source-map tools and Happy DOM are direct library dependencies installed with `solid-bun`. No separate Happy DOM installation is needed; it loads only through `solid-bun/test` and stays out of browser bundles.
@@ -77,7 +77,7 @@ if (import.meta.hot) {
 }
 ```
 
-For TypeScript, use `moduleResolution: "Bundler"`, `jsx: "preserve"`, `jsxImportSource: "@solidjs/web"` and `types: ["bun", "solid-bun/types"]`; install `typescript` and `@types/bun` for checking. The example includes a complete configuration. CSS Modules work through `import styles from './App.module.css'`.
+For TypeScript, use `moduleResolution: "Bundler"`, `jsx: "preserve"`, `jsxImportSource: "@solidjs/web"` and `types: ["bun", "solid-bun/types"]`; install `typescript` and `@types/bun` for checking. The example includes a complete configuration. CSS Modules work through `import styles from './App.module.css'`. Production builds write `styles.name` into the markup as the class name itself, so a static `class={styles.panel}` or `class={[styles.panel, styles.wide]}` costs no effect; `/*@once*/` marks any other expression as static.
 
 ## Workers and optional configuration
 
@@ -113,7 +113,7 @@ Options: `root` (current directory), `entry` (`index.html`), `outdir` (`dist`), 
 | Export | Purpose |
 | --- | --- |
 | `solid-bun` | `dev(options)`, `build(options)`, `preview(options)`, `SolidBunOptions` |
-| `solid-bun/plugin` | `createSolidPlugin(hmr?, root?)` for custom Bun pipelines; root selects the application for peer validation |
+| `solid-bun/plugin` | `createSolidPlugin(hmr?, root?, inlineClasses?)` for custom Bun pipelines; root selects the application for peer validation, `inlineClasses` writes the class names of CSS Modules below root into the markup as `build` does |
 | `solid-bun/dev-plugin` | Native HTML dev-server plugin configured through bunfig |
 | `solid-bun/client` | `watchWorker`, browser-only lifecycle types |
 | `solid-bun/test` | Opt-in Happy DOM + real Solid browser builds + runtime JSX/CSS transforms |

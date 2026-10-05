@@ -73,7 +73,7 @@ export async function build(options: SolidBunOptions = {}): Promise<void> {
     const result = await Bun.build({ entrypoints: [item.entry], outdir: item.outdir,
       naming: { entry: item.naming, chunk: '[name]-[hash].[ext]', asset: '[name]-[hash].[ext]' },
       ...(item.publicPath ? { publicPath: item.publicPath } : {}),
-      target: 'browser', minify: true, sourcemap: 'linked', plugins: [createSolidPlugin(false, root)],
+      target: 'browser', minify: true, sourcemap: 'linked', plugins: [createSolidPlugin(false, root, true)],
       // Bun resolves the `development` export condition unless NODE_ENV is production.
       define: { 'process.env.NODE_ENV': '"production"' } });
     if (!result.success) throw new AggregateError(result.logs, result.logs.map(String).join('\n'));
