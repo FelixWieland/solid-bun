@@ -1,6 +1,6 @@
 {
   "name": "solid-bun",
-  "version": "2.0.0-rc.13.4",
+  "version": "2.0.0-rc.14",
   "description": "Client-side Solid 2 with Bun: compiler, HMR, workers, source maps and bun:test.",
   "license": "UNLICENSED",
   "type": "module",
@@ -53,22 +53,22 @@
     "prepack": "bun run build"
   },
   "peerDependencies": {
-    "solid-js": "2.0.0-rc.13",
-    "@solidjs/web": "2.0.0-rc.13"
+    "solid-js": "2.0.0-rc.14",
+    "@solidjs/web": "2.0.0-rc.14"
   },
   "dependencies": {
     "@jridgewell/remapping": "2.3.5",
     "@jridgewell/trace-mapping": "0.3.31",
-    "@solidjs/compiler": "2.0.0-rc.13",
-    "happy-dom": "20.14.5",
-    "magic-string": "1.4.2",
-    "oxc-parser": "0.152.0"
+    "@solidjs/compiler": "2.0.0-rc.14",
+    "happy-dom": "20.14.6",
+    "magic-string": "1.4.3",
+    "oxc-parser": "0.153.0"
   },
   "devDependencies": {
-    "@solidjs/router": "2.0.0-next.32",
-    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/router": "2.0.0-next.38",
+    "@solidjs/web": "2.0.0-rc.14",
     "@types/bun": "1.4.2",
-    "solid-js": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.14",
     "typescript": "5.9.3"
   },
   "peerDependenciesMeta": {

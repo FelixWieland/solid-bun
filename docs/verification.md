@@ -19,6 +19,10 @@ The browser snapshot tool failed, so checks used the same collaborative browser'
 
 The compiler's refresh pass no longer offers the `esm` mode; its `vite` mode emits the same `$$refreshESM` path and is used with the existing Bun hot-object facade. Headless Chrome 154 via CDP against the example built from the packed archive: a click set `Count: 1`; a CSS Module edit changed the panel background to `rgb(18, 112, 72)` without a reload and kept `Count: 1`; a component edit updated the heading without a full reload and remounted local state (`Count: 0`, worker text reset with the remounted paragraph). With a syntax error, reloading showed Bun's build error page; after restoring the source the page reloaded itself and rendered the app again. No page exceptions were reported.
 
+### Solid 2.0.0-rc.14 (2026-10-11)
+
+Solid, `@solidjs/web` and `@solidjs/compiler` 2.0.0-rc.14 with `@solidjs/router` 2.0.0-next.38, which requires rc.14; Happy DOM 20.14.6, `magic-string` 1.4.3, `oxc-parser` 0.153.0. No source change beyond the pinned versions. Run with Bun **1.4.3-canary.1 (e655c5803)**, not 1.4.2: `bun run check`, `bun test` (43 tests, including the router build without seroval), `bun run build` and `bun run verify:package`. MINT's type check, lint and unit/API tests, among them a production bundle of its entry and workers through the plugin, passed against the packed archive. HMR was not checked again in a browser.
+
 ### Backend proxy (2026-10-02)
 
 After HMR WebSockets moved to the shared relay: installed Chrome via Playwright against the example from the packed rc.13.3 archive. A click set `Count: 1`; a CSS Module edit changed the panel background to `rgb(18, 112, 72)` and kept `Count: 1`; a component edit updated the heading without a further navigation. No page exceptions. Source edits were restored.
